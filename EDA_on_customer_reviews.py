@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
 
 # for doing linear algebraic manipulations on data
 import numpy as np
@@ -20,49 +18,32 @@ import math
 import warnings
 warnings.filterwarnings('ignore')
 
-
-# In[2]:
-
-
 # now import the dataset
 df1 = pd.read_csv('1429_1.csv', delimiter=',', low_memory = False)
 nRow, nCol = df1.shape
 print(f'There are {nRow} rows and {nCol} columns')
 
 
-# In[3]:
-
-
 # since we only need specific to our application so see the data and remove the unnecessary columns
 df1.head(10)
-
-
-# In[4]:
-
 
 list(df1.columns)
 
 
-# <font color='purple'>The above columns are self explanatory but if you it is tough to get insight of what that particular column is all about then seperately print that df1['column_name'] and see.
-# 
-# For our application we only need information about review_text, product name, user recommendation and number of people found that review helpful.Therefore, I am dropping other columns and reducing the dataset to only four columns, i.e., ‘name’, ‘reviews.text’, ‘reviews.doRecommend’, and ‘reviews.numHelpful’:</font>
-
-# In[5]:
-
+# <font color='purple'>The above columns are self explanatory but if you it is tough to get insight of what that particular
+# column is all about then seperately print that df1['column_name'] and see.
+#
+# For our application we only need information about review_text, product name, user recommendation and number of people found
+# that review helpful.Therefore, I am dropping other columns and reducing the dataset to only four columns, i.e., ‘name’, ‘reviews.text’,
+# ‘reviews.doRecommend’, and ‘reviews.numHelpful’:</font>
 
 df1 = df1[['name', 'reviews.text', 'reviews.doRecommend', 'reviews.numHelpful']]
 print('shape of the data-->', df1.shape)
 df1.head(10)
 
 
-# In[6]:
-
-
 # Let’s see if there are any null values present in our dataset
 df1.isnull().sum()
-
-
-# In[7]:
 
 
 # There are a few null values in the dataset. So, let’s drop these null values and proceed further
@@ -70,9 +51,9 @@ df1.dropna(inplace = True)
 df1.isnull().sum()
 
 
-# <font color='purple'>I am only considering those products that have at least 200 reviews. I am doing this to make sure that I have a sufficient number of reviews for each product. Here, we will use lambda functions with filter() to filter our dataset.</font>
+# <font color='purple'>I am only considering those products that have at least 200 reviews. I am doing this to make sure that 
+# I have a sufficient number of reviews for each product. Here, we will use lambda functions with filter() to filter our dataset.</font>
 
-# In[8]:
 
 
 df1 = df1.groupby('name').filter(lambda x:len(x)>200).reset_index(drop = True)
@@ -80,9 +61,8 @@ df1 = df1.groupby('name').filter(lambda x:len(x)>200).reset_index(drop = True)
 print('number of products-->', len(df1['name'].unique()))
 
 
-# <font color = 'purple'>Now, we are left with 10 products. Also,  the 'reviews.doRecommend' column contains values in the form of True-False and 'reviews.numHelpful' contains floating-point numbers, which is not possible to process. Therefore, I am converting these columns into integers</font>
-
-# In[9]:
+# <font color = 'purple'>Now, we are left with 10 products. Also,  the 'reviews.doRecommend' column contains values in the form
+# of True-False and 'reviews.numHelpful' contains floating-point numbers, which is not possible to process. Therefore, I am converting these columns into integers</font>
 
 
 df1['reviews.doRecommend'] = df1['reviews.doRecommend'].astype(int)
@@ -93,17 +73,18 @@ df1
 # <font color='purple'>Ok that's great. We are done with the data preprocessing part according to our application. Now we will cover data cleaning.</font>
 # # Data Cleaning
 
-# <font color='purple'>Cleaning a text data is a bit rigourous task as it contains a lot of noise in the form of punctuations, symbols and stopwords.So, it becomes necessary to clean the text not just it to be more understandable but also to make more insights from this.
-# Here, we have four columns in our dataset out of which two columns ('name', 'reviews.text') contain textual data. So, let's start with the 'name' column first and take a look at the text present in this column</font>
-
-# In[10]:
+# <font color='purple'>Cleaning a text data is a bit rigourous task as it contains a lot of noise in the form of punctuations, symbols and stopwords.So, it 
+# becomes necessary to clean the text not just it to be more understandable but also to make more insights from this.
+# Here, we have four columns in our dataset out of which two columns ('name', 'reviews.text') contain textual data. So, let's start with the 'name' column 
+# first and take a look at the text present in this column</font>
 
 
 # see the unique texts in the name column
 df1['name'].unique()
 
 
-# <font color='purple'>If we observe, we can see that there are some seperations having ',,,' in between which is of no use for our application. so we need to remove this.</font>
+# <font color='purple'>If we observe, we can see that there are some seperations having ',,,' in between which is of no use for our
+# application. so we need to remove this.</font>
 
 # In[11]:
 
@@ -112,7 +93,9 @@ df1['name'] = df1['name'].apply(lambda x: x.split(',,,')[0])
 df1['name'].unique()
 
 
-# <font color='purple'>Now, it’s time to move on to the second column – reviews.text’. This column contains product reviews from different users, which are longer in length, and our complete analysis will be based on this data. Therefore, it becomes necessary to clean this thoroughly. The best way of determining data cleaning steps is by taking a look at some product reviews from the dataset</font>
+# <font color='purple'>Now, it’s time to move on to the second column – reviews.text’. This column contains product reviews 
+# from different users, which are longer in length, and our complete analysis will be based on this data. Therefore, it becomes necessary 
+# to clean this thoroughly. The best way of determining data cleaning steps is by taking a look at some product reviews from the dataset</font>
 
 # In[12]:
 
@@ -122,7 +105,8 @@ for index, text in enumerate(df1['reviews.text'][35:40]):
     print('Review {}\n'.format(index+1), text)
 
 
-# <font color = 'purple'>Here, you can see that we have some contractions like “It’s”, numbers like “3” and punctuations like “,”, “!” and “.” present in the reviews. We’ll handle these by performing the below operations:
+# <font color = 'purple'>Here, you can see that we have some contractions like “It’s”, numbers like “3” and punctuations like “,”, “!” 
+# and “.” present in the reviews. We’ll handle these by performing the below operations:
 # 
 # *Expand contractions<br>
 # *Lowercase the reviews<br>
@@ -131,7 +115,8 @@ for index, text in enumerate(df1['reviews.text'][35:40]):
 # *So, let’s start by expanding contractions.</font>
 
 # ## Expanding contractions
-# <font color='green'> Contractions are shortened version of words like don't for 'do not' etc. We need to expand these to increase the understanding and better analysis of the text.</font>
+# <font color='green'> Contractions are shortened version of words like don't for 'do not' etc. We need to expand these to increase the 
+# understanding and better analysis of the text.</font>
 
 # In[13]:
 
@@ -178,9 +163,6 @@ contractions = { "ain't": "are not","'s":" is","aren't": "are not",
 contractions_find = re.compile('(%s)' % '|'.join(contractions.keys()))
 
 
-# In[14]:
-
-
 # make a fuction for expanding the contractions
 def expand_contractions(text, contractions = contractions):
     # if found from the contractions dict replace it with value of the key
@@ -188,8 +170,6 @@ def expand_contractions(text, contractions = contractions):
         return contractions[match.group(0)]
     return contractions_find.sub(replace, text)
 
-
-# In[15]:
 
 
 # expand the contractions
@@ -200,9 +180,8 @@ for index,text in enumerate(df1['expanded'][35:45]):
 
 
 # ## Lowercase the letters
-# <font color='green'>In NLP, models treat words like Goat and goat differently, even if they are the same. Therefore, to overcome this problem, we lowercase the words. Here, I am using the lower() function available in Python for converting text to lowercase</font>
-
-# In[16]:
+# <font color='green'>In NLP, models treat words like Goat and goat differently, even if they are the same. Therefore, to overcome this problem, 
+# we lowercase the words. Here, I am using the lower() function available in Python for converting text to lowercase</font>
 
 
 df1['lowered'] = df1['expanded'].apply(lambda x: x.lower())
@@ -210,9 +189,9 @@ df1['lowered']
 
 
 # ## Removing digits and words containing digits
-# <font color='green'>we need to remove numbers and words containing digits from the reviews. I am doing this because digits and words containing digits do not give much importance to the main words.</font>
+# <font color='green'>we need to remove numbers and words containing digits from the reviews. I am doing this because digits and words containing 
+# digits do not give much importance to the main words.</font>
 
-# In[17]:
 
 
 # Use lambda function to do this
@@ -220,15 +199,12 @@ df1['digits_removed']=df1['lowered'].apply(lambda x: re.sub('\w*\d\w*','', x))
 
 
 # ## Removing Punctuations
-# <font color='green'>Punctuations are the marks in English like commas, hyphens, full stops, etc. These are important for English grammar but not for text analysis.<br>Here, string.punctuations function contains all the punctuations and we use regular expressions to search them in the text and remove them</font>
-
-# In[18]:
+# <font color='green'>Punctuations are the marks in English like commas, hyphens, full stops, etc. These are important for English grammar
+# but not for text analysis.<br>Here, string.punctuations function contains all the punctuations and we use regular expressions to search them
+# in the text and remove them</font>
 
 
 df1['removed_punct']=df1['digits_removed'].apply(lambda x: re.sub('[%s]' % re.escape(string.punctuation), '', x))
-
-
-# In[19]:
 
 
 # removing extra spaces and geeting cleaned data
@@ -245,18 +221,21 @@ for index,text in enumerate(df1['cleaned'][35:45]):
 
 
 # # Preparing Text Data for Exploratory Data Analysis 
-# <font color='magenta'>In this section, we’ll create a Document Term Matrix that we’ll later use in our analysis.A Document Term Matrix provides the frequency of a word in a corpus (collection of documents), which in this case are reviews. It helps in analyzing the occurrence of words in different documents in a corpus.for more information on document term matrix please visit https://en.wikipedia.org/wiki/Document-term_matrix <br>
+# <font color='magenta'>In this section, we’ll create a Document Term Matrix that we’ll later use in our analysis.A Document Term Matrix provides 
+# the frequency of a word in a corpus (collection of documents), which in this case are reviews. It helps in analyzing the occurrence of words in 
+# different documents in a corpus.for more information on document term matrix please visit https://en.wikipedia.org/wiki/Document-term_matrix <br>
+
 # In this section, we’ll do the following things:
 # 
 # *Stopwords Removal<br>
 # *Lemmatization<br>
 # *Create Document Term Matrix<br>
-# Stopwords are the most common words of a language like ‘I’, ‘this’, ‘is’, ‘in’ which do not add much value to the meaning of a document. These values are removed to decrease the dataset size and increase focus on meaningful words.
+# Stopwords are the most common words of a language like ‘I’, ‘this’, ‘is’, ‘in’ which do not add much value to the meaning of a document.
+# These values are removed to decrease the dataset size and increase focus on meaningful words.
 # 
-# Lemmatization is a systematic process of reducing a token to its lemma. It uses vocabulary, word structure, part of speech tags, and grammar relations to convert a word to its base form.For more on lemmatization please visit https://en.wikipedia.org/wiki/Lemmatisation <br>
+# Lemmatization is a systematic process of reducing a token to its lemma. It uses vocabulary, word structure, part of speech tags, and grammar
+# relations to convert a word to its base form.For more on lemmatization please visit https://en.wikipedia.org/wiki/Lemmatisation <br>
 # We’ll use 'SpaCy' for the removal of stopwords and lemmatization. It is a library for advanced Natural Language Processing in Python and Cython</font>
-
-# In[21]:
 
 
 get_ipython().system('pip install spacy')
@@ -268,23 +247,15 @@ get_ipython().system('python -m spacy download en_core_web_sm')
 nlp = spacy.load('en_core_web_sm',disable=['parser', 'ner'])
 
 
-# In[22]:
-
-
 #lemmatization by fremoving stopwords
 df1['lemmatized']=df1['cleaned'].apply(lambda x: ' '.join([token.lemma_ for token in list(nlp(x)) if (token.is_stop==False)]))
 
-
-# In[23]:
 
 
 # We have removed stopwords and lemmatized our reviews successfully. 
 #Let’s group them according to the products
 df_grouped=df1[['name','lemmatized']].groupby(by='name').agg(lambda x:' '.join(x))
 df_grouped.head()
-
-
-# In[24]:
 
 
 # Creating Document Term Matrix
@@ -299,13 +270,14 @@ df_dtMatrix.head()
 # <font color='green'>Finally, we have completed all the procedures required before starting our analysis.</font>
 
 # # Exploratory Data Analysis on Amazon Product Reviews
-# <font color = 'magenta'>Yes – it's finally time for Exploratory Data Analysis. It is a crucial part of any data science project because that’s where you get to know more about the data. In this phase, you can reveal hidden patterns in the data and generate insights from it.</font>
+# <font color = 'magenta'>Yes – it's finally time for Exploratory Data Analysis. It is a crucial part of any data science project because that’s
+# where you get to know more about the data. In this phase, you can reveal hidden patterns in the data and generate insights from it.</font>
 
-# <font color='green'>So, let’s start by looking at the common words present in the reviews for each product. For this, I will use the document term matrix created earlier with word clouds for plotting these words. Word clouds are the visual representations of the frequency of different words present in a document. It gives importance to the more frequent words which are bigger in size compared to other less frequent words.<br>
+# <font color='green'>So, let’s start by looking at the common words present in the reviews for each product. For this, I will use the document term 
+# matrix created earlier with word clouds for plotting these words. Word clouds are the visual representations of the frequency of different words 
+# present in a document. It gives importance to the more frequent words which are bigger in size compared to other less frequent words.<br>
 # 
 # Word clouds can be generated using the 'wordcloud' library. So, let’s plot word clouds for each product</font>
-
-# In[25]:
 
 
 # Importing wordcloud for plotting word cloud and textwrap for wrapping longer text
@@ -313,8 +285,6 @@ get_ipython().system('pip install wordcloud')
 from wordcloud import WordCloud
 from textwrap import wrap
 
-
-# In[26]:
 
 
 #Function for generating wordcloud
@@ -326,8 +296,6 @@ def gene_wordCloud(data, title):
     plt.title('\n'.join(wrap(title,60)),fontsize=13)
     plt.show()
 
-
-# In[27]:
 
 
 # Taking the Transpose of document term matrix
@@ -344,10 +312,8 @@ for index, product in enumerate(df_dtMatrix.columns):
 #     * after that most frequent words are: 'use', 'easy','old','smart'etc. which tells that people find products easy to use. Some also find it old.</font>
 #    
 # <font color='green'> Now we can go deeper using sentiment analysis over text data, this also hepls for company to know which products they need to improve more.
-# Here, in this case, checking only the polarity, i.e., how much a text is positive or negative, is sufficient. We can check the polarity of a review using the TextBlob library in Python</font>
-#     
-
-# In[37]:
+# Here, in this case, checking only the polarity, i.e., how much a text is positive or negative, is sufficient. We can check the polarity of a review using 
+# the TextBlob library in Python</font>    
 
 
 # importing textBlob
@@ -355,13 +321,8 @@ get_ipython().system('pip install textblob')
 from textblob import TextBlob 
 
 
-# In[42]:
-
-
 df1['polarity'] = df1['lemmatized'].apply(lambda x: TextBlob(x).sentiment.polarity)
 
-
-# In[46]:
 
 
 #Let’s take a look at some of the most positive and negative reviews from the customers
@@ -369,8 +330,6 @@ print("3 Random Reviews with Highest Polarity:")
 for index,review in enumerate(df1.iloc[df1['polarity'].sort_values(ascending=False)[:3].index]['reviews.text']):
       print('-->Review {}:\n'.format(index+1),review)
 
-
-# In[47]:
 
 
 # Now printing three reviews with lowest polarity(most negative)
@@ -381,7 +340,6 @@ for index,review in enumerate(df1.iloc[df1['polarity'].sort_values(ascending=Tru
 
 # ### Now we can draw a bar graph for each product to understand it thoroughly using the polarity
 
-# In[51]:
 
 
 product_polarity_sorted=pd.DataFrame(df1.groupby('name')['polarity'].mean().sort_values(ascending=True))
@@ -403,9 +361,8 @@ plt.yticks([])
 plt.show()
 
 
-# We can see that according to the polarity of reviews, Amazon needs to improve Fire Kids Edition Tablet and Kindle Voyage E-reader. <br>Let’s also take a look at the number of reviewers who recommended a particular product. For this, we can take the percentage of reviewers and plot that
-
-# In[52]:
+# We can see that according to the polarity of reviews, Amazon needs to improve Fire Kids Edition Tablet and Kindle Voyage E-reader. 
+# <br>Let’s also take a look at the number of reviewers who recommended a particular product. For this, we can take the percentage of reviewers and plot that
 
 
 recommend_percentage=pd.DataFrame(((df1.groupby('name')['reviews.doRecommend'].sum()*100)/df1.groupby('name')['reviews.doRecommend'].count()).sort_values(ascending=True))
@@ -428,12 +385,13 @@ plt.yticks([])
 plt.show()
 
 
-# <font color='purple'>Here, we can see that the Fire Kids Edition Tablet has the lowest recommendation percentage. It’s reviews also have the lowest polarity. So, we can say that the</font> <font color='red'>polarity of reviews affects the chances of a product getting recommended.</font>
+# <font color='purple'>Here, we can see that the Fire Kids Edition Tablet has the lowest recommendation percentage.
+# It’s reviews also have the lowest polarity. So, we can say that the</font> <font color='red'>polarity of reviews affects the chances
+# of a product getting recommended.</font>
 
 # Another thing that we can look at is the readability of reviews upvoted as helpful by others.
-# For this, we can use the <font color='red'>textstat library</font> in Python. Textstat is typically used for determining readability, complexity, and grade level of a particular corpus. Each of these indices works on a different methodology for determining the readability level of a document.
-
-# In[55]:
+# For this, we can use the <font color='red'>textstat library</font> in Python. Textstat is typically used for determining readability, 
+# complexity, and grade level of a particular corpus. Each of these indices works on a different methodology for determining the readability level of a document.
 
 
 get_ipython().system('pip install textstat')
@@ -453,13 +411,13 @@ print('Gunning Fog Index of upvoted reviews=>',df1[df1['reviews.numHelpful']>1][
 print('Gunning Fog Index of not upvoted reviews=>',df1[df1['reviews.numHelpful']<=1]['gunning_fog'].mean())
 
 
-# <font color='green'>As we can see there is very little difference in the Dale Chall Score and the Flesch Reading Score for helpful and not helpful reviews. But there is a considerable amount of variation in the Gunning Fog Index
+# <font color='green'>As we can see there is very little difference in the Dale Chall Score and the Flesch Reading Score for helpful and
+# not helpful reviews. But there is a considerable amount of variation in the Gunning Fog Index
 # 
-# Still, we cannot tell the difference in the readability of the two. The textstat library has a solution for this as well. It provides the <font color='red'>text_standard() function</font>. that uses various readability checking formulas, combines the result and returns the grade of education required to understand a particular document completely.</font>
-# 
-# 
+# Still, we cannot tell the difference in the readability of the two. The textstat library has a solution for this as well. It provides the
+# <font color='red'>text_standard() function</font>. that uses various readability checking formulas, combines the result and returns the grade
+# of education required to understand a particular document completely.</font>
 
-# In[56]:
 
 
 df1['text_standard']=df1['reviews.text'].apply(lambda x: textstat.text_standard(x))
@@ -470,9 +428,9 @@ print('Text Standard of not upvoted reviews=>',df1[df1['reviews.numHelpful']<=1]
 
 # <font color='magenta'> We can see that both the text are understandable by anyone who has completed 5th or 6th grade</font><br>
 # 
-# Let’s take a look at the reading time of reviews upvoted as helpful and non-helpful. An average adult reads about 250 words per minute. We can also calculate the reading time of a document using the textstat library. It provides the <font color='red'>reading_time() function</font>, which takes a piece of text as an argument and returns the reading time for it in seconds.
-
-# In[57]:
+# Let’s take a look at the reading time of reviews upvoted as helpful and non-helpful. An average adult reads about 250 words per minute. 
+# We can also calculate the reading time of a document using the textstat library. It provides the <font color='red'>reading_time() function</font>, 
+# which takes a piece of text as an argument and returns the reading time for it in seconds.
 
 
 df1['reading_time']=df1['reviews.text'].apply(lambda x: textstat.reading_time(x))
@@ -484,9 +442,10 @@ print('Reading Time of not upvoted reviews=>',df1[df1['reviews.numHelpful']<=1][
 # <font color='green'> It is quite surprising to see that upvoted reviews have more reading time. This means people find it helpful reading longer reviews.</font>
 
 # ### So its done now. We can summaries our analysis as below:
-# <font color='magenta'>1. Most of the people love the products.<br>2. Most of them find easy to use.<br>3.Amazon needs to work on the Fire Kids Edition Tablet because it has the most negative reviews. It is also the least recommended product<br>4.The majority of reviews are written in simple English and are easily understandable by anyone who has 5th or 6th grade of school.<br>5.The reading time of helpful reviews is twice that of non-helpful reviews which means people find longer reviews helpful</font>
-
-# In[ ]:
+# <font color='magenta'>1. Most of the people love the products.<br>2. Most of them find easy to use.<br>3.Amazon needs to work on the 
+# Fire Kids Edition Tablet because it has the most negative reviews. It is also the least recommended product<br>4.The majority of reviews are
+# written in simple English and are easily understandable by anyone who has 5th or 6th grade of school.<br>5.The reading time of helpful reviews 
+# is twice that of non-helpful reviews which means people find longer reviews helpful</font>
 
 
 
