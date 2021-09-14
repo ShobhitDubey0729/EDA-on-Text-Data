@@ -1,0 +1,6 @@
+matplotlib
+spacy
+wordcloud
+textwrap
+textblob
+textstat
